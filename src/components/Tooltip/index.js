@@ -8,6 +8,7 @@ import {propTypes, defaultProps} from './tooltipPropTypes';
 import TooltipSense from './TooltipSense';
 import makeCancellablePromise from '../../libs/MakeCancellablePromise';
 import * as DeviceCapabilities from '../../libs/DeviceCapabilities';
+import Log from "../../libs/Log";
 
 class Tooltip extends PureComponent {
     constructor(props) {
@@ -26,6 +27,7 @@ class Tooltip extends PureComponent {
             // The width and height of the wrapper view
             wrapperWidth: 0,
             wrapperHeight: 0,
+            isTooltipVisible: false
         };
 
         // Whether the tooltip is first tooltip to activate the TooltipSense
@@ -37,6 +39,11 @@ class Tooltip extends PureComponent {
         this.getWrapperPosition = this.getWrapperPosition.bind(this);
         this.showTooltip = this.showTooltip.bind(this);
         this.hideTooltip = this.hideTooltip.bind(this);
+        this.hideTooltipOnScroll = this.hideTooltipOnScroll.bind(this);
+    }
+
+    componentDidMount() {
+        document.addEventListener("scroll", () => this.hideTooltipOnScroll(), true);
     }
 
     componentDidUpdate(prevProps) {
@@ -81,6 +88,7 @@ class Tooltip extends PureComponent {
      * Display the tooltip in an animation.
      */
     showTooltip() {
+        this.setState({isTooltipVisible: true})
         if (!this.state.isRendered) {
             this.setState({isRendered: true});
         }
@@ -125,6 +133,9 @@ class Tooltip extends PureComponent {
      * Hide the tooltip in an animation.
      */
     hideTooltip() {
+        this.setState({isTooltipVisible: false});
+        document.removeEventListener("scroll", () => this.hideTooltipOnScroll(), true);
+
         this.animation.stopAnimation();
         this.shouldStartShowAnimation = false;
         if (TooltipSense.isActive() && !this.isTooltipSenseInitiator) {
@@ -139,6 +150,12 @@ class Tooltip extends PureComponent {
             }).start();
         }
         TooltipSense.deactivate();
+    }
+
+    hideTooltipOnScroll() {
+        if (!this.state.isTooltipVisible) return;
+        Log.client("Hidding tooltip...");
+        this.hideTooltip();
     }
 
     render() {
@@ -205,6 +222,7 @@ class Tooltip extends PureComponent {
                     containerStyles={this.props.containerStyles}
                     onHoverIn={this.showTooltip}
                     onHoverOut={this.hideTooltip}
+                    hoverOnMouseOver
                 >
                     {child}
                 </Hoverable>
