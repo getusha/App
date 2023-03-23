@@ -102,6 +102,10 @@ class Hoverable extends Component {
                 style={this.props.containerStyles}
                 ref={el => this.wrapperView = el}
                 onMouseEnter={() => this.setIsHovered(true)}
+                onMouseMove={() => {
+                    if(!this.props.hoverOnMouseOver) return;
+                    this.props.onHoverIn()
+                }}
                 onMouseLeave={() => this.setIsHovered(false)}
                 onBlur={(el) => {
                     if (this.wrapperView.contains(el.relatedTarget)) {
