@@ -34,6 +34,9 @@ import FullPageNotFoundView from '../../components/BlockingViews/FullPageNotFoun
 import ReportHeaderSkeletonView from '../../components/ReportHeaderSkeletonView';
 import withViewportOffsetTop, {viewportOffsetTopPropTypes} from '../../components/withViewportOffsetTop';
 import * as ReportActionsUtils from '../../libs/ReportActionsUtils';
+import EmojiPicker from "../../components/EmojiPicker/EmojiPicker";
+import * as EmojiPickerAction from "../../libs/actions/EmojiPickerAction";
+
 
 const propTypes = {
     /** Navigation route context info provided by react navigation */
@@ -287,6 +290,16 @@ class ReportScreen extends React.Component {
                                         isDrawerOpen={this.props.isDrawerOpen}
                                         parentViewHeight={this.state.skeletonViewContainerHeight}
                                     />
+                                </>
+                            )}
+
+                            {/* Note: The report should be allowed to mount even if the initial report actions are not loaded. If we prevent rendering the report while they are loading then
+                            we'll unnecessarily unmount the ReportActionsView which will clear the new marker lines initial state. */}
+                            {(!this.isReportReadyForDisplay() || isLoadingInitialReportActions) && (
+                                <ReportActionsSkeletonView containerHeight={this.state.skeletonViewContainerHeight} />
+                            )}
+                            {this.isReportReadyForDisplay() &&
+                                <>
                                     <ReportFooter
                                         errors={addWorkspaceRoomOrChatErrors}
                                         pendingAction={addWorkspaceRoomOrChatPendingAction}
@@ -296,17 +309,10 @@ class ReportScreen extends React.Component {
                                         isComposerFullSize={this.props.isComposerFullSize}
                                         onSubmitComment={this.onSubmitComment}
                                     />
+                                    <EmojiPicker ref={EmojiPickerAction.emojiPickerRef} />
                                 </>
-                            )}
+                            }
 
-                            {/* Note: The report should be allowed to mount even if the initial report actions are not loaded. If we prevent rendering the report while they are loading then
-                            we'll unnecessarily unmount the ReportActionsView which will clear the new marker lines initial state. */}
-                            {(!this.isReportReadyForDisplay() || isLoadingInitialReportActions) && (
-                                <>
-                                    <ReportActionsSkeletonView containerHeight={this.state.skeletonViewContainerHeight} />
-                                    <ReportFooter shouldDisableCompose isOffline={this.props.network.isOffline} />
-                                </>
-                            )}
                             <PortalHost name={CONST.REPORT.DROP_HOST_NAME} />
                         </View>
                     </FullPageNotFoundView>
