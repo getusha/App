@@ -18,6 +18,7 @@ import headerWithBackButtonPropTypes from './headerWithBackButtonPropTypes';
 import useThrottledButtonState from '../../hooks/useThrottledButtonState';
 import useLocalize from '../../hooks/useLocalize';
 import useKeyboardState from '../../hooks/useKeyboardState';
+import useInitialDimensions from '../../hooks/useInitialDimensions';
 
 function HeaderWithBackButton({
     iconFill = undefined,
@@ -51,6 +52,7 @@ function HeaderWithBackButton({
     const [isDownloadButtonActive, temporarilyDisableDownloadButton] = useThrottledButtonState();
     const {translate} = useLocalize();
     const {isKeyboardShown} = useKeyboardState();
+    const {runOnDimensionRestore} = useInitialDimensions();
     return (
         <View style={[styles.headerBar, shouldShowBorderBottom && styles.borderBottom, shouldShowBackButton && styles.pl2]}>
             <View style={[styles.dFlex, styles.flexRow, styles.alignItemsCenter, styles.flexGrow1, styles.justifyContentBetween, styles.overflowHidden]}>
@@ -61,7 +63,7 @@ function HeaderWithBackButton({
                                 if (isKeyboardShown) {
                                     Keyboard.dismiss();
                                 }
-                                onBackButtonPress();
+                                runOnDimensionRestore(onBackButtonPress);
                             }}
                             style={[styles.touchableButtonImage]}
                             accessibilityRole="button"
