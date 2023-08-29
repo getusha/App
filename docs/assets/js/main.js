@@ -1,10 +1,11 @@
 /* eslint-disable no-unused-vars */
-function toggleHeaderMenu() {
+function toggleHeaderMenu(close) {
     const lhn = document.getElementById('lhn');
     const lhnContent = document.getElementById('lhn-content');
     const anguleUpIcon = document.getElementById('angle-up-icon');
     const barsIcon = document.getElementById('bars-icon');
-    if (lhnContent.className === 'expanded') {
+
+    if (lhnContent.className === 'expanded' || close) {
         // Collapse the LHN in mobile
         lhn.className = '';
         lhnContent.className = '';
@@ -216,7 +217,8 @@ window.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    document.getElementById('header-button').addEventListener('click', toggleHeaderMenu);
+    window.addEventListener('popstate', () => toggleHeaderMenu(true))
+    document.getElementById('header-button').addEventListener('click', () => toggleHeaderMenu());
 
     // Back button doesn't exist on all the pages
     const backButton = document.getElementById('back-button');
