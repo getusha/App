@@ -170,18 +170,18 @@ function ReportPreview(props) {
 
     return (
         <View style={[styles.chatItemMessage, ...props.containerStyles]}>
-            <PressableWithoutFeedback
-                onPress={() => {
-                    Navigation.navigate(ROUTES.getReportRoute(props.iouReportID));
-                }}
-                onPressIn={() => DeviceCapabilities.canUseTouchScreen() && ControlSelection.block()}
-                onPressOut={() => ControlSelection.unblock()}
-                onLongPress={(event) => showContextMenuForReport(event, props.contextMenuAnchor, props.chatReportID, props.action, props.checkIfContextMenuActive)}
-                style={[styles.flexRow, styles.justifyContentBetween]}
-                accessibilityRole="button"
-                accessibilityLabel={props.translate('iou.viewDetails')}
-            >
-                <View style={[styles.reportPreviewBox, props.isHovered || isScanning || props.isWhisper ? styles.reportPreviewBoxHoverBorder : undefined]}>
+            <View style={[styles.reportPreviewBox, props.isHovered || isScanning || props.isWhisper ? styles.reportPreviewBoxHoverBorder : undefined]}>
+                <PressableWithoutFeedback
+                    onPress={() => {
+                        Navigation.navigate(ROUTES.getReportRoute(props.iouReportID));
+                    }}
+                    onPressIn={() => DeviceCapabilities.canUseTouchScreen() && ControlSelection.block()}
+                    onPressOut={() => ControlSelection.unblock()}
+                    onLongPress={(event) => showContextMenuForReport(event, props.contextMenuAnchor, props.chatReportID, props.action, props.checkIfContextMenuActive)}
+                    style={[styles.flexRow, styles.justifyContentBetween]}
+                    accessibilityRole="button"
+                    accessibilityLabel={props.translate('iou.viewDetails')}
+                >
                     {hasReceipts && (
                         <ReportActionItemImages
                             images={lastThreeReceipts}
@@ -235,8 +235,8 @@ function ReportPreview(props) {
                             />
                         )}
                     </View>
-                </View>
-            </PressableWithoutFeedback>
+                </PressableWithoutFeedback>
+            </View>
         </View>
     );
 }

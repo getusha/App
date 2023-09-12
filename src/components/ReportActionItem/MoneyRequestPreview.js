@@ -225,7 +225,101 @@ function MoneyRequestPreview(props) {
         return CurrencyUtils.convertToDisplayString(requestAmount, requestCurrency);
     };
 
-    const childContainer = (
+    const childContent = (
+        <>
+            {hasReceipt && (
+                <ReportActionItemImages
+                    images={receiptImages}
+                    isHovered={isScanning}
+                />
+            )}
+            {_.isEmpty(props.transaction) ? (
+                <MoneyRequestSkeletonView />
+            ) : (
+                <View style={styles.moneyRequestPreviewBoxText}>
+                    <View style={[styles.flexRow]}>
+                        <View style={[styles.flex1, styles.flexRow, styles.alignItemsCenter]}>
+                            <Text style={[styles.textLabelSupporting, styles.mb1, styles.lh20]}>{getPreviewHeaderText()}</Text>
+                            {Boolean(getSettledMessage()) && (
+                                <>
+                                    <Icon
+                                        src={Expensicons.DotIndicator}
+                                        width={4}
+                                        height={4}
+                                        additionalStyles={[styles.mr1, styles.ml1]}
+                                    />
+                                    <Text style={[styles.textLabelSupporting, styles.mb1, styles.lh20]}>{getSettledMessage()}</Text>
+                                </>
+                            )}
+                        </View>
+                        {hasFieldErrors && (
+                            <Icon
+                                src={Expensicons.DotIndicator}
+                                fill={colors.red}
+                            />
+                        )}
+                    </View>
+                    <View style={[styles.flexRow]}>
+                        <View style={[styles.flex1, styles.flexRow, styles.alignItemsCenter]}>
+                            <Text
+                                style={[
+                                    styles.moneyRequestPreviewAmount,
+                                    StyleUtils.getAmountFontSizeAndLineHeight(variables.fontSizeXLarge, variables.lineHeightXXLarge, isSmallScreenWidth, windowWidth),
+                                ]}
+                                numberOfLines={1}
+                            >
+                                {getDisplayAmountText()}
+                            </Text>
+                            {ReportUtils.isSettled(props.iouReport.reportID) && !props.isBillSplit && (
+                                <View style={styles.defaultCheckmarkWrapper}>
+                                    <Icon
+                                        src={Expensicons.Checkmark}
+                                        fill={themeColors.iconSuccessFill}
+                                    />
+                                </View>
+                            )}
+                        </View>
+                        {props.isBillSplit && (
+                            <View style={styles.moneyRequestPreviewBoxAvatar}>
+                                <MultipleAvatars
+                                    icons={participantAvatars}
+                                    shouldStackHorizontally
+                                    size="small"
+                                    isHovered={props.isHovered}
+                                    shouldUseCardBackground
+                                />
+                            </View>
+                        )}
+                    </View>
+                    {shouldShowMerchant && (
+                        <View style={[styles.flexRow]}>
+                            <Text style={[styles.textLabelSupporting, styles.mb1, styles.lh20, styles.breakWord]}>{requestMerchant}</Text>
+                        </View>
+                    )}
+                    <View style={[styles.flexRow]}>
+                        <View style={[styles.flex1]}>
+                            {!isCurrentUserManager && props.shouldShowPendingConversionMessage && (
+                                <Text style={[styles.textLabel, styles.colorMuted, styles.mt1]}>{props.translate('iou.pendingConversionMessage')}</Text>
+                            )}
+                            {shouldShowDescription && <Text style={[styles.mt1, styles.colorMuted]}>{description}</Text>}
+                        </View>
+                        {props.isBillSplit && !_.isEmpty(participantAccountIDs) && (
+                            <Text style={[styles.textLabel, styles.colorMuted, styles.ml1]}>
+                                {props.translate('iou.amountEach', {
+                                    amount: CurrencyUtils.convertToDisplayString(
+                                        IOUUtils.calculateAmount(isPolicyExpenseChat ? 1 : participantAccountIDs.length - 1, requestAmount, requestCurrency),
+                                        requestCurrency,
+                                    ),
+                                })}
+                            </Text>
+                        )}
+                    </View>
+                </View>
+            )}
+        </>
+    )
+
+    return (
         <View>
             <OfflineWithFeedback
                 errors={props.walletTerms.errors}
@@ -237,115 +331,21 @@ function MoneyRequestPreview(props) {
                 needsOffscreenAlphaCompositing
             >
                 <View style={[styles.moneyRequestPreviewBox, isScanning || props.isWhisper ? styles.reportPreviewBoxHoverBorder : undefined, ...props.containerStyles]}>
-                    {hasReceipt && (
-                        <ReportActionItemImages
-                            images={receiptImages}
-                            isHovered={isScanning}
-                        />
-                    )}
-                    {_.isEmpty(props.transaction) ? (
-                        <MoneyRequestSkeletonView />
-                    ) : (
-                        <View style={styles.moneyRequestPreviewBoxText}>
-                            <View style={[styles.flexRow]}>
-                                <View style={[styles.flex1, styles.flexRow, styles.alignItemsCenter]}>
-                                    <Text style={[styles.textLabelSupporting, styles.mb1, styles.lh20]}>{getPreviewHeaderText()}</Text>
-                                    {Boolean(getSettledMessage()) && (
-                                        <>
-                                            <Icon
-                                                src={Expensicons.DotIndicator}
-                                                width={4}
-                                                height={4}
-                                                additionalStyles={[styles.mr1, styles.ml1]}
-                                            />
-                                            <Text style={[styles.textLabelSupporting, styles.mb1, styles.lh20]}>{getSettledMessage()}</Text>
-                                        </>
-                                    )}
-                                </View>
-                                {hasFieldErrors && (
-                                    <Icon
-                                        src={Expensicons.DotIndicator}
-                                        fill={colors.red}
-                                    />
-                                )}
-                            </View>
-                            <View style={[styles.flexRow]}>
-                                <View style={[styles.flex1, styles.flexRow, styles.alignItemsCenter]}>
-                                    <Text
-                                        style={[
-                                            styles.moneyRequestPreviewAmount,
-                                            StyleUtils.getAmountFontSizeAndLineHeight(variables.fontSizeXLarge, variables.lineHeightXXLarge, isSmallScreenWidth, windowWidth),
-                                        ]}
-                                        numberOfLines={1}
-                                    >
-                                        {getDisplayAmountText()}
-                                    </Text>
-                                    {ReportUtils.isSettled(props.iouReport.reportID) && !props.isBillSplit && (
-                                        <View style={styles.defaultCheckmarkWrapper}>
-                                            <Icon
-                                                src={Expensicons.Checkmark}
-                                                fill={themeColors.iconSuccessFill}
-                                            />
-                                        </View>
-                                    )}
-                                </View>
-                                {props.isBillSplit && (
-                                    <View style={styles.moneyRequestPreviewBoxAvatar}>
-                                        <MultipleAvatars
-                                            icons={participantAvatars}
-                                            shouldStackHorizontally
-                                            size="small"
-                                            isHovered={props.isHovered}
-                                            shouldUseCardBackground
-                                        />
-                                    </View>
-                                )}
-                            </View>
-                            {shouldShowMerchant && (
-                                <View style={[styles.flexRow]}>
-                                    <Text style={[styles.textLabelSupporting, styles.mb1, styles.lh20, styles.breakWord]}>{requestMerchant}</Text>
-                                </View>
-                            )}
-                            <View style={[styles.flexRow]}>
-                                <View style={[styles.flex1]}>
-                                    {!isCurrentUserManager && props.shouldShowPendingConversionMessage && (
-                                        <Text style={[styles.textLabel, styles.colorMuted, styles.mt1]}>{props.translate('iou.pendingConversionMessage')}</Text>
-                                    )}
-                                    {shouldShowDescription && <Text style={[styles.mt1, styles.colorMuted]}>{description}</Text>}
-                                </View>
-                                {props.isBillSplit && !_.isEmpty(participantAccountIDs) && (
-                                    <Text style={[styles.textLabel, styles.colorMuted, styles.ml1]}>
-                                        {props.translate('iou.amountEach', {
-                                            amount: CurrencyUtils.convertToDisplayString(
-                                                IOUUtils.calculateAmount(isPolicyExpenseChat ? 1 : participantAccountIDs.length - 1, requestAmount, requestCurrency),
-                                                requestCurrency,
-                                            ),
-                                        })}
-                                    </Text>
-                                )}
-                            </View>
-                        </View>
-                    )}
+                    {props.onPreviewPressed ? (
+                        <PressableWithFeedback
+                            onPress={props.onPreviewPressed}
+                            onPressIn={() => DeviceCapabilities.canUseTouchScreen() && ControlSelection.block()}
+                            onPressOut={() => ControlSelection.unblock()}
+                            onLongPress={showContextMenu}
+                            accessibilityLabel={props.isBillSplit ? props.translate('iou.split') : props.translate('iou.cash')}
+                            accessibilityHint={CurrencyUtils.convertToDisplayString(requestAmount, requestCurrency)}
+                        >
+                            {childContent}
+                        </PressableWithFeedback>
+                    ) : childContent}
                 </View>
             </OfflineWithFeedback>
         </View>
-    );
-
-    if (!props.onPreviewPressed) {
-        return childContainer;
-    }
-
-    return (
-        <PressableWithFeedback
-            onPress={props.onPreviewPressed}
-            onPressIn={() => DeviceCapabilities.canUseTouchScreen() && ControlSelection.block()}
-            onPressOut={() => ControlSelection.unblock()}
-            onLongPress={showContextMenu}
-            accessibilityLabel={props.isBillSplit ? props.translate('iou.split') : props.translate('iou.cash')}
-            accessibilityHint={CurrencyUtils.convertToDisplayString(requestAmount, requestCurrency)}
-        >
-            {childContainer}
-        </PressableWithFeedback>
     );
 }
 
