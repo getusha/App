@@ -1,6 +1,6 @@
 import Onyx from 'react-native-onyx';
-import type {ValueOf} from 'type-fest';
 import type {OnyxEntry} from 'react-native-onyx';
+import type {ValueOf} from 'type-fest';
 import type {IOUAction, IOUType} from '@src/CONST';
 import CONST from '@src/CONST';
 import ONYXKEYS from '@src/ONYXKEYS';
@@ -155,6 +155,7 @@ function isValidMoneyRequestType(iouType: string): boolean {
         CONST.IOU.TYPE.REQUEST,
         CONST.IOU.TYPE.SUBMIT,
         CONST.IOU.TYPE.SPLIT,
+        CONST.IOU.TYPE.SPLIT_EXPENSE,
         CONST.IOU.TYPE.SEND,
         CONST.IOU.TYPE.PAY,
         CONST.IOU.TYPE.TRACK,
@@ -192,8 +193,8 @@ function isMovingTransactionFromTrackExpense(action?: IOUAction) {
     return false;
 }
 
-function shouldUseTransactionDraft(action: IOUAction | undefined) {
-    return action === CONST.IOU.ACTION.CREATE || isMovingTransactionFromTrackExpense(action);
+function shouldUseTransactionDraft(action: IOUAction | undefined, type?: IOUType) {
+    return action === CONST.IOU.ACTION.CREATE || type === CONST.IOU.TYPE.SPLIT_EXPENSE || isMovingTransactionFromTrackExpense(action);
 }
 
 function formatCurrentUserToAttendee(currentUser?: PersonalDetails, reportID?: string) {

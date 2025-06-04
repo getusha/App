@@ -90,7 +90,7 @@ function SettlementButton({
     const [isUserValidated] = useOnyx(ONYXKEYS.ACCOUNT, {selector: (account) => account?.validated, canBeMissing: true});
     const policyEmployeeAccountIDs = policyID ? getPolicyEmployeeAccountIDs(policyID) : [];
     const reportBelongsToWorkspace = policyID ? doesReportBelongToWorkspace(chatReport, policyEmployeeAccountIDs, policyID) : false;
-    const policyIDKey = reportBelongsToWorkspace ? policyID : iouReport?.policyID ?? CONST.POLICY.ID_FAKE;
+    const policyIDKey = reportBelongsToWorkspace ? policyID : (iouReport?.policyID ?? CONST.POLICY.ID_FAKE);
     const [userWallet] = useOnyx(ONYXKEYS.USER_WALLET, {canBeMissing: true});
     const hasActivatedWallet = ([CONST.WALLET.TIER_NAME.GOLD, CONST.WALLET.TIER_NAME.PLATINUM] as string[]).includes(userWallet?.tierName ?? '');
 
@@ -303,14 +303,14 @@ function SettlementButton({
                 buttonOptions.push({
                     text: translate('iou.settlePersonal', {formattedAmount}),
                     icon: Expensicons.User,
-                    value: hasIntentToPay ? CONST.IOU.PAYMENT_TYPE.EXPENSIFY : lastPaymentMethod ?? CONST.IOU.PAYMENT_TYPE.ELSEWHERE,
+                    value: hasIntentToPay ? CONST.IOU.PAYMENT_TYPE.EXPENSIFY : (lastPaymentMethod ?? CONST.IOU.PAYMENT_TYPE.ELSEWHERE),
                     backButtonText: translate('iou.individual'),
                     subMenuItems: getInvoicesOptions(false),
                 });
                 buttonOptions.push({
                     text: translate('iou.settleBusiness', {formattedAmount}),
                     icon: Expensicons.Building,
-                    value: hasIntentToPay ? CONST.IOU.PAYMENT_TYPE.EXPENSIFY : lastPaymentMethod ?? CONST.IOU.PAYMENT_TYPE.ELSEWHERE,
+                    value: hasIntentToPay ? CONST.IOU.PAYMENT_TYPE.EXPENSIFY : (lastPaymentMethod ?? CONST.IOU.PAYMENT_TYPE.ELSEWHERE),
                     backButtonText: translate('iou.business'),
                     subMenuItems: getInvoicesOptions(true),
                 });
@@ -396,7 +396,7 @@ function SettlementButton({
 
     const selectPaymentMethod = (event: KYCFlowEvent, triggerKYCFlow: TriggerKYCFlow, paymentMethod?: PaymentMethod, selectedPolicy?: Policy) => {
         if (!isUserValidated) {
-            Navigation.navigate(ROUTES.SETTINGS_WALLET_VERIFY_ACCOUNT.getRoute(Navigation.getActiveRoute()));
+            Navigation.navigate(ROUTES.SETTINGS_CONTACT_METHOD_VERIFY_ACCOUNT.getRoute(Navigation.getActiveRoute()));
             return;
         }
 
@@ -531,7 +531,7 @@ function SettlementButton({
                     onOptionsMenuShow={onPaymentOptionsShow}
                     onOptionsMenuHide={onPaymentOptionsHide}
                     buttonRef={buttonRef}
-                    shouldAlwaysShowDropdownMenu={isInvoiceReport}
+                    shouldAlwaysShowDropdownMenu={isInvoiceReport && !onlyShowPayElsewhere}
                     customText={customText}
                     menuHeaderText={isInvoiceReport ? translate('workspace.invoices.paymentMethods.chooseInvoiceMethod') : undefined}
                     isSplitButton={shouldUseSplitButton}
