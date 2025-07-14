@@ -67,7 +67,7 @@ import * as ErrorUtils from '@libs/ErrorUtils';
 import {createFile} from '@libs/fileDownload/FileUtils';
 import getIsNarrowLayout from '@libs/getIsNarrowLayout';
 import GoogleTagManager from '@libs/GoogleTagManager';
-import {getLastUsedPaymentMethod} from '@libs/IOUUtils';
+import {getLastUsedPaymentMethod, getLastUsedPaymentMethods} from '@libs/IOUUtils';
 import {translate, translateLocal} from '@libs/Localize';
 import Log from '@libs/Log';
 import * as NetworkStore from '@libs/Network/NetworkStore';
@@ -465,33 +465,6 @@ function deleteWorkspace(policyID: string, policyName: string) {
             },
         });
 
-        Object.values(allReports ?? {})
-            .filter((iouReport) => iouReport?.type === CONST.REPORT.TYPE.IOU)
-            .forEach((iouReport) => {
-                const lastUsedPaymentMethod = getLastUsedPaymentMethod(iouReport?.policyID);
-
-                if (!lastUsedPaymentMethod || !iouReport?.policyID) {
-                    return;
-                }
-
-                if (lastUsedPaymentMethod?.iou?.name === policyID) {
-                    optimisticData.push({
-                        onyxMethod: Onyx.METHOD.MERGE,
-                        key: ONYXKEYS.NVP_LAST_PAYMENT_METHOD,
-                        value: {
-                            [iouReport?.policyID]: {
-                                iou: {
-                                    name: policyID !== lastUsedPaymentMethod?.iou?.name ? lastUsedPaymentMethod?.iou?.name : '',
-                                },
-                                lastUsed: {
-                                    name: policyID !== lastUsedPaymentMethod?.iou?.name ? lastUsedPaymentMethod?.iou?.name : '',
-                                },
-                            },
-                        },
-                    });
-                }
-            });
-
         if (report?.iouReportID) {
             const reportTransactions = ReportUtils.getReportTransactions(report.iouReportID);
             for (const transaction of reportTransactions) {
@@ -507,6 +480,33 @@ function deleteWorkspace(policyID: string, policyName: string) {
                     value: violations,
                 });
             }
+        }
+    });
+
+    const lastUsedPaymentMethods = getLastUsedPaymentMethods();
+
+    Object.keys(lastUsedPaymentMethods ?? {})?.forEach((paymentMethodKey) => {
+        const lastUsedPaymentMethod = lastUsedPaymentMethods?.[paymentMethodKey];
+
+        if(typeof lastUsedPaymentMethod === 'string' || !lastUsedPaymentMethod) {
+            return;
+        }
+
+        if (lastUsedPaymentMethod.iou.name === policyID) {
+            optimisticData.push({
+                onyxMethod: Onyx.METHOD.MERGE,
+                key: ONYXKEYS.NVP_LAST_PAYMENT_METHOD,
+                value: {
+                    [paymentMethodKey]: {
+                        iou: {
+                            name: policyID !== lastUsedPaymentMethod?.lastUsed?.name ? lastUsedPaymentMethod?.lastUsed?.name : '',
+                        },
+                        lastUsed: {
+                            name: policyID !== lastUsedPaymentMethod?.lastUsed?.name ? lastUsedPaymentMethod?.lastUsed?.name : '',
+                        },
+                    },
+                },
+            });
         }
     });
 
